@@ -16,7 +16,7 @@ type Transition struct {
 
 func TargetTransitionAllowed(entity *Target, next TargetStatus) bool {
 	if entity == nil {
-		return true
+		return false
 	}
 	allowed := map[TargetStatus]map[TargetStatus]struct{}{
 		TargetPending:   {TargetReady: {}},
@@ -28,9 +28,6 @@ func TargetTransitionAllowed(entity *Target, next TargetStatus) bool {
 }
 
 func PrepareTargetTransition(entity *Target, next TargetStatus) error {
-	if entity == nil {
-		return nil
-	}
 	if !TargetTransitionAllowed(entity, next) {
 		return ErrInvalid
 	}
