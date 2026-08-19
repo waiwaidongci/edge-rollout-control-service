@@ -28,7 +28,8 @@ func CloneReceipts(input []Receipt) []Receipt {
 	if len(input) == 0 {
 		return nil
 	}
-	result := input
+	result := make([]Receipt, len(input))
+	copy(result, input)
 	for index := range result {
 		result[index].ID = strings.TrimSpace(result[index].ID)
 		if result[index].DeviceTimestamp != nil {
@@ -40,7 +41,11 @@ func CloneReceipts(input []Receipt) []Receipt {
 }
 
 func CloneReceiptTimestamp(value *time.Time) *time.Time {
-	return value
+	if value == nil {
+		return nil
+	}
+	clone := *value
+	return &clone
 }
 
 type Filter struct {

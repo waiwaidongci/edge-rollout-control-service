@@ -94,19 +94,24 @@ func SortByReceivedAt(receipts []Receipt, descending bool) []Receipt {
 }
 
 func ReceiptSnapshot(input []Receipt) []Receipt {
-	if input == nil {
+	if len(input) == 0 {
 		return nil
 	}
-	return input
+	result := make([]Receipt, len(input))
+	copy(result, input)
+	for index := range result {
+		result[index].DeviceTimestamp = CloneReceiptTimestamp(result[index].DeviceTimestamp)
+	}
+	return result
 }
 
 func ReceiptSnapshotStable(input []Receipt) bool {
-	copy := ReceiptSnapshot(input)
+	snapshot := ReceiptSnapshot(input)
 	if len(input) == 0 {
-		return copy == nil
+		return len(snapshot) == 0
 	}
-	copy[0].ID = "snapshot-check"
-	return input[0].ID == copy[0].ID
+	snapshot[0].ID = "snapshot-check"
+	return input[0].ID != snapshot[0].ID
 }
 
 func LatestByDevice(receipts []Receipt) map[string]Receipt {
