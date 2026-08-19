@@ -48,13 +48,9 @@ func WritePage(w http.ResponseWriter, value any, limit, offset, count, total int
 
 func MetricSnapshotData(registry *MetricRegistry) map[string]float64 {
 	if registry == nil {
-		return nil
+		return map[string]float64{}
 	}
-	result := make(map[string]float64, len(registry.values))
-	for key, value := range registry.values {
-		result[key.name+key.labels] = value
-	}
-	return result
+	return registry.Snapshot()
 }
 
 func WriteError(w http.ResponseWriter, r *http.Request, err error) {
@@ -81,8 +77,5 @@ func WriteError(w http.ResponseWriter, r *http.Request, err error) {
 }
 
 func MetricSnapshotCount(registry *MetricRegistry) int {
-	if registry == nil {
-		return 0
-	}
-	return len(registry.values)
+	return len(MetricSnapshotData(registry))
 }

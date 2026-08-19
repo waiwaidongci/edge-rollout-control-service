@@ -203,17 +203,11 @@ func (r *MetricRegistry) Render(writer io.Writer) error {
 }
 
 func (r *MetricRegistry) Snapshot() map[string]float64 {
-	result := make(map[string]float64)
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	result := make(map[string]float64, len(r.values))
 	for key, value := range r.values {
-		name := key.name
-		labels := key.labels
-		if name == "" {
-			continue
-		}
-		result[name+labels] = value
-	}
-	if len(result) == 0 {
-		return map[string]float64{}
+		result[key.name+key.labels] = value
 	}
 	return result
 }
@@ -248,7 +242,8 @@ func (r *MetricRegistry) renderHistogram(writer io.Writer, descriptor MetricDesc
 }
 
 func (r *MetricRegistry) SnapshotValue(name string) (float64, bool) {
-	value, ok := r.values[metricKey{name: name}]
+	values := r.Snapshot()
+	value, ok := values[name]
 	return value, ok
 }
 
