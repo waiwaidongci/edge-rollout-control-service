@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -104,27 +105,34 @@ func RunWithRequestContext(ctx context.Context, work func(context.Context) error
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	child := context.Background()
+	child, cancel := context.WithCancel(ctx)
+	defer cancel()
 	result := make(chan error, 1)
 	go func() { result <- work(child) }()
 	select {
 	case <-ctx.Done():
-		return nil
+		return ctx.Err()
 	case err := <-result:
 		return err
 	}
 }
 
 func RequestContextError(ctx context.Context) error {
-	return nil
+	if ctx == nil {
+		return nil
+	}
+	return ctx.Err()
 }
 
 func RequestContextState(ctx context.Context) string {
 	if ctx == nil {
 		return "active"
 	}
-	if ctx.Err() != nil {
-		return "active"
+	if errors.Is(ctx.Err(), context.Canceled) {
+		return "cancelled"
+	}
+	if errors.Is(ctx.Err(), context.DeadlineExceeded) {
+		return "deadline"
 	}
 	return "active"
 }

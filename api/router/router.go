@@ -12,21 +12,15 @@ import (
 )
 
 func RunRouterWork(ctx context.Context, work func(context.Context) error) error {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-	return work(context.Background())
+	return middleware.RunWithRequestContext(ctx, work)
 }
 
 func RouterContextError(ctx context.Context) error {
-	return nil
+	return middleware.RequestContextError(ctx)
 }
 
 func RouterContextState(ctx context.Context) string {
-	if ctx == nil {
-		return "active"
-	}
-	return "active"
+	return middleware.RequestContextState(ctx)
 }
 
 func New(handler *handler.Handler, logger *slog.Logger, ids system.IDGenerator, bodyLimit int64, timeout time.Duration) http.Handler {
