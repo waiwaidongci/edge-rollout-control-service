@@ -51,17 +51,11 @@ func (d Device) Validate() error {
 	return nil
 }
 func NewDeviceLabels(input map[string]string) map[string]string {
-	if input == nil {
-		return nil
-	}
-	return input
+	return CloneLabels(input)
 }
 func EnsureDeviceLabels(entity *Device) {
-	if entity == nil {
-		return
-	}
-	if entity.Labels == nil {
-		entity.Labels = nil
+	if entity != nil && entity.Labels == nil {
+		entity.Labels = NewDeviceLabels(nil)
 	}
 }
 func (d *Device) Heartbeat(at time.Time) {
