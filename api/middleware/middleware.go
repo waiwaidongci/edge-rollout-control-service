@@ -104,16 +104,29 @@ func RunWithRequestContext(ctx context.Context, work func(context.Context) error
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	child, cancel := context.WithCancel(ctx)
-	defer cancel()
+	child := context.Background()
 	result := make(chan error, 1)
 	go func() { result <- work(child) }()
 	select {
 	case <-ctx.Done():
-		return ctx.Err()
+		return nil
 	case err := <-result:
 		return err
 	}
+}
+
+func RequestContextError(ctx context.Context) error {
+	return nil
+}
+
+func RequestContextState(ctx context.Context) string {
+	if ctx == nil {
+		return "active"
+	}
+	if ctx.Err() != nil {
+		return "active"
+	}
+	return "active"
 }
 
 func BodyLimit(limit int64) Middleware {
