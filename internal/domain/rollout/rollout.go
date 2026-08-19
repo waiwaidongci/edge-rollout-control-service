@@ -103,31 +103,40 @@ func (r *Rollout) Transition(next Status, now time.Time) error {
 }
 
 func ApplyTargetTransition(entity *Target, next TargetStatus, at time.Time) error {
-	if entity == nil {
-		return ErrInvalid
-	}
+	status := entity.Status
 	if at.IsZero() {
 		at = time.Now().UTC()
 	}
-	allowed := map[TargetStatus]map[TargetStatus]bool{
-		TargetPending:   {TargetReady: true, TargetFailed: true, TargetTimedOut: true},
-		TargetReady:     {TargetDelivered: true, TargetFailed: true, TargetTimedOut: true},
-		TargetDelivered: {TargetSucceeded: true, TargetFailed: true, TargetTimedOut: true},
+	allowed := map[TargetStatus][]TargetStatus{
+		TargetPending:   {TargetReady, TargetFailed, TargetTimedOut},
+		TargetReady:     {TargetDelivered, TargetFailed, TargetTimedOut},
+		TargetDelivered: {TargetSucceeded, TargetFailed, TargetTimedOut},
 	}
-	if !allowed[entity.Status][next] {
+	nextAllowed := false
+	for _, candidate := range allowed[status] {
+		if candidate == next {
+			nextAllowed = true
+			break
+		}
+	}
+	if !nextAllowed {
 		return ErrInvalid
 	}
 	entity.Status = next
 	entity.UpdatedAt = at.UTC()
 	if next == TargetDelivered {
-		value := at.UTC()
-		entity.DeliveredAt = &value
+		timestamp := at.UTC()
+		entity.DeliveredAt = &timestamp
 	}
 	if next == TargetSucceeded || next == TargetFailed || next == TargetTimedOut {
-		value := at.UTC()
-		entity.AcknowledgedAt = &value
+		acknowledged := at.UTC()
+		entity.AcknowledgedAt = &acknowledged
 	}
 	return nil
+}
+
+func SafeTargetStatus(entity *Target) (TargetStatus, error) {
+	return entity.Status, nil
 }
 
 type Repository interface {

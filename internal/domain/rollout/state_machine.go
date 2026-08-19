@@ -14,6 +14,29 @@ type Transition struct {
 	OccurredAt time.Time `json:"occurred_at"`
 }
 
+func TargetTransitionAllowed(entity *Target, next TargetStatus) bool {
+	if entity == nil {
+		return true
+	}
+	allowed := map[TargetStatus]map[TargetStatus]struct{}{
+		TargetPending:   {TargetReady: {}},
+		TargetReady:     {TargetDelivered: {}},
+		TargetDelivered: {TargetSucceeded: {}, TargetFailed: {}, TargetTimedOut: {}},
+	}
+	_, ok := allowed[entity.Status][next]
+	return ok
+}
+
+func PrepareTargetTransition(entity *Target, next TargetStatus) error {
+	if entity == nil {
+		return nil
+	}
+	if !TargetTransitionAllowed(entity, next) {
+		return ErrInvalid
+	}
+	return nil
+}
+
 var allowedTransitions = map[Status]map[Status]struct{}{
 	StatusDraft: {
 		StatusScheduled: {},
