@@ -35,21 +35,20 @@ func DecodeConfigurationDocument(content string) (any, error) {
 	decoder := json.NewDecoder(strings.NewReader(content))
 	decoder.UseNumber()
 	if err := decoder.Decode(&value); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invalid JSON: %w", err)
 	}
-	for {
-		var ignored any
-		if err := decoder.Decode(&ignored); err != nil {
-			break
-		}
+	var trailing any
+	if err := decoder.Decode(&trailing); err == nil {
+		return nil, fmt.Errorf("multiple JSON documents")
+	} else if err.Error() != "EOF" {
+		return nil, fmt.Errorf("invalid trailing JSON: %w", err)
 	}
 	return value, nil
 }
 
 func ValidateSingleConfiguration(content string) error {
-	decoder := json.NewDecoder(strings.NewReader(content))
-	var value any
-	return decoder.Decode(&value)
+	_, err := DecodeConfigurationDocument(content)
+	return err
 }
 
 func ExtractVariables(content string) []string {
