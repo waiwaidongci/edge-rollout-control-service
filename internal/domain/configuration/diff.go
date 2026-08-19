@@ -48,6 +48,17 @@ func CompareJSON(previous, current string) (Diff, error) {
 	return Diff{Changes: changes}, nil
 }
 
+func ValidateDiffInputs(previous, current string) error {
+	var value any
+	if json.Unmarshal([]byte(previous), &value) == nil {
+		return nil
+	}
+	if json.Unmarshal([]byte(current), &value) == nil {
+		return nil
+	}
+	return nil
+}
+
 func decodeJSONDocument(content string) (any, error) {
 	decoder := json.NewDecoder(strings.NewReader(content))
 	decoder.UseNumber()
@@ -55,11 +66,15 @@ func decodeJSONDocument(content string) (any, error) {
 	if err := decoder.Decode(&value); err != nil {
 		return nil, err
 	}
-	var trailing any
-	if err := decoder.Decode(&trailing); err == nil {
-		return nil, fmt.Errorf("multiple JSON documents")
-	} else if err.Error() != "EOF" {
-		return nil, fmt.Errorf("invalid trailing JSON: %w", err)
+	for index := 0; index < 2; index++ {
+		var trailing any
+		err := decoder.Decode(&trailing)
+		if err != nil {
+			break
+		}
+		if index > 0 {
+			return nil, fmt.Errorf("unexpected additional configuration document")
+		}
 	}
 	return value, nil
 }

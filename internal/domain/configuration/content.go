@@ -30,6 +30,28 @@ func ValidateJSON(content string) error {
 	return nil
 }
 
+func DecodeConfigurationDocument(content string) (any, error) {
+	var value any
+	decoder := json.NewDecoder(strings.NewReader(content))
+	decoder.UseNumber()
+	if err := decoder.Decode(&value); err != nil {
+		return nil, err
+	}
+	for {
+		var ignored any
+		if err := decoder.Decode(&ignored); err != nil {
+			break
+		}
+	}
+	return value, nil
+}
+
+func ValidateSingleConfiguration(content string) error {
+	decoder := json.NewDecoder(strings.NewReader(content))
+	var value any
+	return decoder.Decode(&value)
+}
+
 func ExtractVariables(content string) []string {
 	matches := variablePattern.FindAllStringSubmatch(content, -1)
 	seen := make(map[string]struct{}, len(matches))
