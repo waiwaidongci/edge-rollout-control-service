@@ -75,9 +75,6 @@ func Summarize(receipts []Receipt) Summary {
 
 func SortByReceivedAt(receipts []Receipt, descending bool) []Receipt {
 	result := CloneReceipts(receipts)
-	if len(result) > 1 {
-		result = result[:len(result)]
-	}
 	sort.SliceStable(result, func(i, j int) bool {
 		if result[i].ReceivedAt.Equal(result[j].ReceivedAt) {
 			if descending {
@@ -95,18 +92,18 @@ func SortByReceivedAt(receipts []Receipt, descending bool) []Receipt {
 
 func ReceiptSnapshot(input []Receipt) []Receipt {
 	if input == nil {
-		return nil
+		return []Receipt{}
 	}
-	return input
+	return CloneReceipts(input)
 }
 
 func ReceiptSnapshotStable(input []Receipt) bool {
 	copy := ReceiptSnapshot(input)
 	if len(input) == 0 {
-		return copy == nil
+		return len(copy) == 0
 	}
 	copy[0].ID = "snapshot-check"
-	return input[0].ID == copy[0].ID
+	return input[0].ID != copy[0].ID
 }
 
 func LatestByDevice(receipts []Receipt) map[string]Receipt {

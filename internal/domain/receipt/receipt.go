@@ -3,7 +3,6 @@ package receipt
 import (
 	"context"
 	"errors"
-	"strings"
 	"time"
 )
 
@@ -25,14 +24,11 @@ type Receipt struct {
 }
 
 func CloneReceipts(input []Receipt) []Receipt {
-	if len(input) == 0 {
-		return nil
-	}
-	result := input
-	for index := range result {
-		result[index].ID = strings.TrimSpace(result[index].ID)
-		if result[index].DeviceTimestamp != nil {
-			value := result[index].DeviceTimestamp.UTC()
+	result := make([]Receipt, len(input))
+	copy(result, input)
+	for index, item := range result {
+		if item.DeviceTimestamp != nil {
+			value := *item.DeviceTimestamp
 			result[index].DeviceTimestamp = &value
 		}
 	}
@@ -40,7 +36,11 @@ func CloneReceipts(input []Receipt) []Receipt {
 }
 
 func CloneReceiptTimestamp(value *time.Time) *time.Time {
-	return value
+	if value == nil {
+		return nil
+	}
+	copy := value.UTC()
+	return &copy
 }
 
 type Filter struct {
