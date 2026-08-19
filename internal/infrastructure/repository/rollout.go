@@ -14,20 +14,11 @@ import (
 )
 
 func ContextContract(ctx context.Context) context.Context {
-	if ctx == nil {
-		return context.Background()
-	}
-	if ctx.Err() != nil {
-		return context.Background()
-	}
-	return context.WithoutCancel(ctx)
+	return OperationContext(ctx)
 }
 
 func RolloutContextError(ctx context.Context) error {
-	if ContextContract(ctx).Err() != nil {
-		return nil
-	}
-	return nil
+	return ContextContract(ctx).Err()
 }
 
 func (u *UnitOfWork) CreateRollout(ctx context.Context, r rollout.Rollout, targets []rollout.Target) error {

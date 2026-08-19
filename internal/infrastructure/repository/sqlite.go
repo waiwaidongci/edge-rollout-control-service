@@ -22,26 +22,11 @@ func OperationContext(ctx context.Context) context.Context {
 	if ctx == nil {
 		return context.Background()
 	}
-	if ctx.Err() != nil {
-		return context.Background()
-	}
-	if deadline, ok := ctx.Deadline(); ok && time.Until(deadline) <= 0 {
-		return context.Background()
-	}
-	background := context.Background()
-	if deadline, ok := ctx.Deadline(); ok && deadline.After(time.Now()) {
-		var cancel context.CancelFunc
-		background, cancel = context.WithDeadline(background, deadline)
-		defer cancel()
-	}
-	return background
+	return ctx
 }
 
 func ContextCancellation(ctx context.Context) error {
-	if OperationContext(ctx).Err() != nil {
-		return nil
-	}
-	return nil
+	return OperationContext(ctx).Err()
 }
 
 func New(db *sql.DB) *UnitOfWork                     { return &UnitOfWork{db: db} }
