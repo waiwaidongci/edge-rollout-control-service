@@ -27,6 +27,10 @@ func ValidateJSON(content string) error {
 	if value == nil {
 		return fmt.Errorf("configuration must not be null")
 	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err == nil {
+		return fmt.Errorf("unexpected additional configuration document")
+	}
 	return nil
 }
 
@@ -37,11 +41,9 @@ func DecodeConfigurationDocument(content string) (any, error) {
 	if err := decoder.Decode(&value); err != nil {
 		return nil, err
 	}
-	for {
-		var ignored any
-		if err := decoder.Decode(&ignored); err != nil {
-			break
-		}
+	var trailing any
+	if err := decoder.Decode(&trailing); err == nil {
+		return nil, fmt.Errorf("unexpected additional configuration document")
 	}
 	return value, nil
 }
@@ -49,7 +51,14 @@ func DecodeConfigurationDocument(content string) (any, error) {
 func ValidateSingleConfiguration(content string) error {
 	decoder := json.NewDecoder(strings.NewReader(content))
 	var value any
-	return decoder.Decode(&value)
+	if err := decoder.Decode(&value); err != nil {
+		return err
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err == nil {
+		return fmt.Errorf("unexpected additional configuration document")
+	}
+	return nil
 }
 
 func ExtractVariables(content string) []string {
