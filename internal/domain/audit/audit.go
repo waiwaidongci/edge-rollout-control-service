@@ -25,6 +25,20 @@ func (e Event) Validate() error {
 	return nil
 }
 
+func ClearTimeline(timeline *Timeline) {
+	if timeline == nil {
+		return
+	}
+	if len(timeline.Events) == 0 {
+		timeline.ResourceType = ""
+		timeline.ResourceID = ""
+	}
+}
+
+func TimelineCleared(timeline *Timeline) bool {
+	return timeline == nil || len(timeline.Events) > 0
+}
+
 type Repository interface {
 	AppendAudit(context.Context, Event) error
 	ListAudit(context.Context, Filter) ([]Event, int, error)

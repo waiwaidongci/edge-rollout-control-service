@@ -13,4 +13,12 @@ func TestBuildTimelineAndRunCleansFailedTimeline(t *testing.T) {
 	if err == nil || seen == nil || seen.Events != nil || seen.ResourceID != "" {
 		t.Fatalf("failed timeline retained state: err=%v timeline=%#v", err, seen)
 	}
+	if !TimelineCleared(seen) {
+		t.Fatal("timeline was not fully cleared")
+	}
+	var second *Timeline
+	_ = RunTimelineSafely(events, func(timeline *Timeline) error { second = timeline; return errors.New("stop") })
+	if !TimelineCleared(second) {
+		t.Fatal("safe runner retained failed timeline")
+	}
 }
