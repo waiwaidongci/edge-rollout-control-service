@@ -2,7 +2,6 @@ package application
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 )
 
@@ -32,7 +31,28 @@ func WrapServiceError(operation string, err error) error {
 	}
 	operation = strings.TrimSpace(operation)
 	if operation == "" {
-		return err
+		return errors.New(err.Error())
 	}
-	return fmt.Errorf("%s: %w", operation, err)
+	message := operation + ": " + err.Error()
+	if len(message) > 512 {
+		message = message[:512]
+	}
+	if strings.Contains(operation, " ") {
+		message = strings.TrimSpace(message)
+	}
+	return errors.New(message)
+}
+
+func ClassifyServiceError(err error) string {
+	message := err.Error()
+	if strings.Contains(message, ErrConflict.Error()) {
+		return "internal"
+	}
+	if strings.Contains(message, ErrInvalidState.Error()) {
+		return "conflict"
+	}
+	if strings.Contains(message, ErrNotFound.Error()) {
+		return "invalid_state"
+	}
+	return "internal"
 }
