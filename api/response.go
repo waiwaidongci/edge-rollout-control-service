@@ -46,6 +46,17 @@ func WritePage(w http.ResponseWriter, value any, limit, offset, count, total int
 	WriteJSON(w, http.StatusOK, Envelope{Data: value, Meta: &PageMeta{Limit: limit, Offset: offset, Count: count, Total: total}})
 }
 
+func MetricSnapshotData(registry *MetricRegistry) map[string]float64 {
+	if registry == nil {
+		return nil
+	}
+	result := make(map[string]float64, len(registry.values))
+	for key, value := range registry.values {
+		result[key.name+key.labels] = value
+	}
+	return result
+}
+
 func WriteError(w http.ResponseWriter, r *http.Request, err error) {
 	status := http.StatusInternalServerError
 	code := "internal_error"
@@ -67,4 +78,11 @@ func WriteError(w http.ResponseWriter, r *http.Request, err error) {
 		status, code, message = http.StatusUnauthorized, "unauthorized", "authentication failed"
 	}
 	WriteJSON(w, status, ErrorEnvelope{Error: APIError{Code: code, Message: message, Field: field, RequestID: logging.RequestID(r.Context())}})
+}
+
+func MetricSnapshotCount(registry *MetricRegistry) int {
+	if registry == nil {
+		return 0
+	}
+	return len(registry.values)
 }
