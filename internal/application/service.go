@@ -388,7 +388,7 @@ func (s *Service) CreateRollout(ctx context.Context, command CreateRolloutComman
 		targets = append(targets, rollout.Target{ID: s.ids.New(), RolloutID: entity.ID, DeviceID: targetDevice.ID, BatchNumber: index/batchSize + 1, Status: rollout.TargetPending, DesiredConfigurationID: entity.ConfigurationID, CreatedAt: now, UpdatedAt: now})
 	}
 	if err := s.repository.CreateRollout(ctx, entity, targets); err != nil {
-		return rollout.Rollout{}, WrapServiceError(strings.TrimSpace("create rollout"), err)
+		return rollout.Rollout{}, WrapServiceError("create rollout", err)
 	}
 	s.audit(ctx, actor, "rollout.created", "rollout", entity.ID, map[string]any{"target_count": len(targets), "batch_size": batchSize})
 	s.emit(ctx, "rollout.created", entity.ID, entity)
@@ -396,14 +396,11 @@ func (s *Service) CreateRollout(ctx context.Context, command CreateRolloutComman
 }
 
 func RolloutErrorContract(err error) error {
-	if err == nil {
-		return nil
-	}
-	return errors.New("create rollout: " + err.Error())
+	return WrapServiceError("create rollout", err)
 }
 
 func PreserveRolloutCause(operation string, err error) (error, string) {
-	wrapped := errors.New(operation + ": " + err.Error())
+	wrapped := WrapServiceError(operation, err)
 	return wrapped, ClassifyServiceError(wrapped)
 }
 
