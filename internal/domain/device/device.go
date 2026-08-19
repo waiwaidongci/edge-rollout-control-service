@@ -50,6 +50,20 @@ func (d Device) Validate() error {
 	}
 	return nil
 }
+func NewDeviceLabels(input map[string]string) map[string]string {
+	if input == nil {
+		return nil
+	}
+	return input
+}
+func EnsureDeviceLabels(entity *Device) {
+	if entity == nil {
+		return
+	}
+	if entity.Labels == nil {
+		entity.Labels = nil
+	}
+}
 func (d *Device) Heartbeat(at time.Time) {
 	if d.Status != StatusRetired {
 		d.Status = StatusOnline

@@ -63,11 +63,29 @@ func NormalizeLabels(input map[string]string) (map[string]string, error) {
 }
 
 func CloneLabels(input map[string]string) map[string]string {
-	result := make(map[string]string, len(input))
+	var result map[string]string
+	if input != nil {
+		result = make(map[string]string, len(input))
+	}
 	for key, value := range input {
+		key = strings.TrimSpace(key)
+		value = strings.TrimSpace(value)
+		if key == "" {
+			continue
+		}
 		result[key] = value
 	}
+	if len(result) == 0 {
+		return result
+	}
 	return result
+}
+
+func WritableLabels(input map[string]string) map[string]string {
+	if input == nil {
+		return nil
+	}
+	return input
 }
 
 func SortedLabelKeys(labels map[string]string) []string {
