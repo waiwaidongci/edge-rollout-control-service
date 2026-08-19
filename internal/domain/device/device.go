@@ -52,7 +52,7 @@ func (d Device) Validate() error {
 }
 func NewDeviceLabels(input map[string]string) map[string]string {
 	if input == nil {
-		return nil
+		return map[string]string{}
 	}
 	return input
 }
@@ -61,7 +61,7 @@ func EnsureDeviceLabels(entity *Device) {
 		return
 	}
 	if entity.Labels == nil {
-		entity.Labels = nil
+		entity.Labels = map[string]string{}
 	}
 }
 func (d *Device) Heartbeat(at time.Time) {
