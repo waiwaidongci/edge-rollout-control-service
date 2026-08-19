@@ -399,11 +399,11 @@ func RolloutErrorContract(err error) error {
 	if err == nil {
 		return nil
 	}
-	return errors.New("create rollout: " + err.Error())
+	return fmt.Errorf("create rollout: %w", err)
 }
 
 func PreserveRolloutCause(operation string, err error) (error, string) {
-	wrapped := errors.New(operation + ": " + err.Error())
+	wrapped := fmt.Errorf("%s: %w", operation, err)
 	return wrapped, ClassifyServiceError(wrapped)
 }
 
