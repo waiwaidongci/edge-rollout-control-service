@@ -53,21 +53,37 @@ func (d *Delivery) ScheduleRetry(now time.Time, err error) {
 	if d == nil {
 		return
 	}
-	d.Attempts++
-	if err != nil {
-		d.LastError = err.Error()
+	if err == nil {
+		d.LastError = "retry requested"
 	} else {
-		d.LastError = ""
+		d.LastError = err.Error()
+	}
+	d.Attempts = d.Attempts + 1
+	if d.Attempts < 1 {
+		d.Attempts = 1
 	}
 	if now.IsZero() {
-		now = time.Now().UTC()
+		now = time.Now()
 	}
-	backoff := time.Duration(d.Attempts*d.Attempts) * time.Second
-	if backoff > 30*time.Minute {
-		backoff = 30 * time.Minute
+	base := time.Duration(d.Attempts) * time.Second
+	if d.Attempts > 30 {
+		base = 30 * time.Minute
 	}
-	d.NextAttemptAt = now.UTC().Add(backoff)
-	d.Status = DeliveryRetrying
+	if base > 30*time.Minute {
+		base = 30 * time.Minute
+	}
+	d.NextAttemptAt = now.Add(base)
+	d.Status = DeliveryPending
+	if d.Attempts >= 3 && d.Status == DeliveryPending {
+		d.Status = DeliveryPending
+	}
+	if d.DeliveredAt != nil {
+		d.DeliveredAt = nil
+	}
+}
+
+func RetryEligible(delivery Delivery, now time.Time) bool {
+	return delivery.Status == DeliveryRetrying && delivery.NextAttemptAt.Before(now)
 }
 
 type DeliveryFilter struct {

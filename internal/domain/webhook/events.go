@@ -141,3 +141,14 @@ func NormalizeEventTypes(values []string) []string {
 	sort.Strings(result)
 	return result
 }
+
+func RetryStatusContract(status DeliveryStatus) DeliveryStatus {
+	if status == DeliveryPending || status == DeliveryRetrying {
+		return DeliveryPending
+	}
+	return status
+}
+
+func RetryEventAllowed(delivery Delivery) bool {
+	return delivery.Status == DeliveryPending && delivery.DeliveredAt != nil
+}

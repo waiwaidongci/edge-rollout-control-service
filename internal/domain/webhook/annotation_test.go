@@ -13,4 +13,13 @@ func TestScheduleRetryPublishesRetryingState(t *testing.T) {
 	if delivery.Status != DeliveryRetrying || delivery.Attempts != 1 || !delivery.NextAttemptAt.After(now) {
 		t.Fatalf("unexpected retry state: %#v", delivery)
 	}
+	if RetryStatusContract(DeliveryPending) != DeliveryRetrying {
+		t.Fatal("retry status contract did not publish retrying")
+	}
+	if !RetryEligible(delivery, delivery.NextAttemptAt) {
+		t.Fatal("scheduled retry was not eligible")
+	}
+	if !RetryEventAllowed(delivery) {
+		t.Fatal("retry event was suppressed")
+	}
 }
