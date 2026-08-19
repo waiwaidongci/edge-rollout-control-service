@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edge Rollout Control</title>
+  <link rel="stylesheet" href="/console/console/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">EDGE OPERATIONS</p>
+      <h1>发布控制台</h1>
+      <p>查看服务健康状态与当前发布任务，供边缘运维人员快速确认控制面状态。</p>
+    </header>
+    <section class="status-card">
+      <div><span>控制面</span><strong id="health">检查中</strong></div>
+      <div><span>就绪状态</span><strong id="ready">检查中</strong></div>
+      <button id="refresh" type="button">重新检查</button>
+    </section>
+    <section>
+      <div class="section-title"><h2>最近发布</h2><span id="count">0 条</span></div>
+      <div id="rollouts" class="rollouts"><p class="empty">正在读取发布任务…</p></div>
+    </section>
+  </main>
+  <script src="/console/console/app.js"></script>
+</body>
+</html>

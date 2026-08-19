@@ -1,0 +1,13 @@
+{
+  "start": "go run ./cmd/edge-rollout -config configs/config.yaml",
+  "workdir": ".",
+  "env": {
+    "SERVER_ADDR": "127.0.0.1:18082",
+    "DATABASE_DSN": "data/runtime-smoke.db",
+    "WORKER_SCHEDULER_INTERVAL": "250ms",
+    "WORKER_WEBHOOK_INTERVAL": "250ms"
+  },
+  "ready_url": "http://127.0.0.1:18082/healthz",
+  "ready_status": [200],
+  "startup_timeout": 25
+}

@@ -1,0 +1,24 @@
+openapi: 3.0.3
+info:
+  title: Edge Rollout Control API
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8080
+paths:
+  /healthz:
+    get: {responses: {"200": {description: healthy}}}
+  /readyz:
+    get: {responses: {"200": {description: ready}}}
+  /v1/devices:
+    post: {responses: {"201": {description: created}}}
+    get: {responses: {"200": {description: paginated devices}}}
+  /v1/configurations:
+    post: {responses: {"201": {description: created}}}
+    get: {responses: {"200": {description: paginated configurations}}}
+  /v1/rollouts:
+    post: {responses: {"201": {description: created}}}
+    get: {responses: {"200": {description: paginated rollouts}}}
+  /v1/devices/{deviceID}/pending-configuration:
+    get: {responses: {"200": {description: pending configuration}, "204": {description: no work}}}
+  /v1/devices/{deviceID}/receipts:
+    post: {responses: {"201": {description: accepted}, "200": {description: duplicate}}}

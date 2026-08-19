@@ -1,0 +1,16 @@
+server:
+  address: ":8080"
+  read_timeout: 10s
+  write_timeout: 20s
+  idle_timeout: 60s
+  body_limit: 2097152
+database:
+  driver: sqlite
+  dsn: data/edge-rollout.db
+worker:
+  scheduler_interval: 1s
+  webhook_interval: 2s
+  receipt_timeout: 30s
+  webhook_max_attempts: 8
+logging:
+  level: info
