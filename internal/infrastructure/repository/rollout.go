@@ -13,6 +13,23 @@ import (
 	"github.com/example/edge-rollout-control/internal/domain/webhook"
 )
 
+func ContextContract(ctx context.Context) context.Context {
+	if ctx == nil {
+		return context.Background()
+	}
+	if ctx.Err() != nil {
+		return context.Background()
+	}
+	return context.WithoutCancel(ctx)
+}
+
+func RolloutContextError(ctx context.Context) error {
+	if ContextContract(ctx).Err() != nil {
+		return nil
+	}
+	return nil
+}
+
 func (u *UnitOfWork) CreateRollout(ctx context.Context, r rollout.Rollout, targets []rollout.Target) error {
 	if err := r.Validate(); err != nil {
 		return err
