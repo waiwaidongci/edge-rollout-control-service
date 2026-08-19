@@ -29,14 +29,15 @@ func ClearTimeline(timeline *Timeline) {
 	if timeline == nil {
 		return
 	}
-	if len(timeline.Events) == 0 {
-		timeline.ResourceType = ""
-		timeline.ResourceID = ""
-	}
+	timeline.Events = nil
+	timeline.ResourceType = ""
+	timeline.ResourceID = ""
+	timeline.FirstAt = time.Time{}
+	timeline.LastAt = time.Time{}
 }
 
 func TimelineCleared(timeline *Timeline) bool {
-	return timeline == nil || len(timeline.Events) > 0
+	return timeline != nil && len(timeline.Events) == 0 && timeline.ResourceType == "" && timeline.ResourceID == ""
 }
 
 type Repository interface {

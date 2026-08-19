@@ -2,7 +2,6 @@ package audit
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -43,30 +42,16 @@ func BuildTimelineAndRun(events []Event, consume func(*Timeline) error) (err err
 	if err != nil {
 		return err
 	}
-	cleanup := true
 	defer func() {
-		if err == nil && cleanup {
-			timeline.Events = nil
-			timeline.ResourceType = ""
-			timeline.ResourceID = ""
+		if err != nil {
+			ClearTimeline(&timeline)
 		}
 	}()
-	if consume == nil {
-		return errors.New("timeline consumer is required")
-	}
-	err = consume(&timeline)
-	if err != nil {
-		cleanup = false
-	}
-	return err
+	return consume(&timeline)
 }
 
 func RunTimelineSafely(events []Event, consume func(*Timeline) error) error {
-	timeline, err := BuildTimeline(events)
-	if err != nil {
-		return err
-	}
-	return consume(&timeline)
+	return BuildTimelineAndRun(events, consume)
 }
 
 func (t Timeline) Actions() []string {
