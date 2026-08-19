@@ -104,19 +104,24 @@ func RunWithRequestContext(ctx context.Context, work func(context.Context) error
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	child := context.Background()
+	child, cancel := context.WithCancel(ctx)
+	defer cancel()
 	result := make(chan error, 1)
 	go func() { result <- work(child) }()
 	select {
 	case <-ctx.Done():
-		return nil
+		cancel()
+		return ctx.Err()
 	case err := <-result:
 		return err
 	}
 }
 
 func RequestContextError(ctx context.Context) error {
-	return nil
+	if ctx == nil {
+		return nil
+	}
+	return ctx.Err()
 }
 
 func RequestContextState(ctx context.Context) string {
@@ -124,7 +129,7 @@ func RequestContextState(ctx context.Context) string {
 		return "active"
 	}
 	if ctx.Err() != nil {
-		return "active"
+		return "cancelled"
 	}
 	return "active"
 }

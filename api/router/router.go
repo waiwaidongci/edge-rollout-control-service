@@ -15,16 +15,32 @@ func RunRouterWork(ctx context.Context, work func(context.Context) error) error 
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	return work(context.Background())
+	child, cancel := context.WithCancel(ctx)
+	defer cancel()
+	result := make(chan error, 1)
+	go func() { result <- work(child) }()
+	select {
+	case <-ctx.Done():
+		cancel()
+		return ctx.Err()
+	case err := <-result:
+		return err
+	}
 }
 
 func RouterContextError(ctx context.Context) error {
-	return nil
+	if ctx == nil {
+		return nil
+	}
+	return ctx.Err()
 }
 
 func RouterContextState(ctx context.Context) string {
 	if ctx == nil {
 		return "active"
+	}
+	if ctx.Err() != nil {
+		return "cancelled"
 	}
 	return "active"
 }
